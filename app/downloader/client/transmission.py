@@ -345,8 +345,14 @@ class Transmission(_IDownloadClient):
                             break
                     if not tacker_key_flag:
                         continue
-            if tr_error_key and not re.findall(tr_error_key, torrent.error_string, re.I):
-                continue
+            if tr_error_key:
+                announce_results = [x.last_announce_result for x in torrent.tracker_stats]
+                announce_results.append(torrent.error_string)
+
+                # 如果announce_results中均不匹配tr_error_key，则跳过
+                if not any([re.findall(tr_error_key, x, re.I) for x in announce_results]):
+                    continue
+
             remove_torrents.append({
                 "id": torrent.hashString,
                 "name": torrent.name,
@@ -562,6 +568,21 @@ class Transmission(_IDownloadClient):
         ids = self.__parse_ids(ids)
         try:
             return self.trc.verify_torrent(ids=ids)
+        except Exception as err:
+            ExceptionUtils.exception_traceback(err)
+            return False
+
+    def get_client_speed(self):
+        if not self.trc:
+            return False
+        try:
+            session_stats = self.trc.session_stats(timeout=30)
+            if session_stats:
+                return {
+                    "up_speed": session_stats.upload_speed,
+                    "dl_speed": session_stats.download_speed
+                }
+            return False
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
             return False
