@@ -345,8 +345,14 @@ class Transmission(_IDownloadClient):
                             break
                     if not tacker_key_flag:
                         continue
-            if tr_error_key and not re.findall(tr_error_key, torrent.error_string, re.I):
-                continue
+            if tr_error_key:
+                announce_results = [x.last_announce_result for x in torrent.tracker_stats]
+                announce_results.append(torrent.error_string)
+
+                # 如果announce_results中均不匹配tr_error_key，则跳过
+                if not any([re.findall(tr_error_key, x, re.I) for x in announce_results]):
+                    continue
+
             remove_torrents.append({
                 "id": torrent.hashString,
                 "name": torrent.name,
