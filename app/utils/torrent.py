@@ -11,6 +11,9 @@ from app.utils.http_utils import RequestUtils
 from app.utils.types import MediaType
 from config import Config
 
+# Trackers列表
+trackers = Config().user_conf.get('user_pri').get('trackers')
+
 
 class Torrent:
     _torrent_temp_path = None

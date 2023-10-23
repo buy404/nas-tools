@@ -1,0 +1,41 @@
+id: ext
+name: EXT.TO
+domain: https://ext.to/
+encoding: UTF-8
+parser: RenderSpider
+public: true
+proxy: true
+language: en
+search:
+  paths:
+  - path: search/?q={keyword}
+    method: get
+torrents:
+  list:
+    selector: div.table-responsive > table > tbody > tr
+  fields:
+    id:
+      selector: td:nth-child(3) > a
+      attribute: href
+    title:
+      selector: td:nth-child(1) > div.float-left > a > b
+    details:
+      selector: td:nth-child(1) > div.float-left > a
+      attribute: href
+    download:
+      selector: a.dwn-btn.torrent-dwn
+      attribute: href
+    date_added:
+      selector: td:nth-child(4) > div > span:nth-child(2)
+    size:
+      selector: td:nth-child(2) > div > span:nth-child(2)
+    seeders:
+      selector: td:nth-child(5) > span.text-success
+    leechers:
+      selector: td:nth-child(6) > span.text-danger
+    downloadvolumefactor:
+      case:
+        '*': 0
+    uploadvolumefactor:
+      case:
+        '*': 1

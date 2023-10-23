@@ -1,0 +1,40 @@
+id: skrbt
+name: SkrBT
+domain: https://skrbtqo.top/
+encoding: UTF-8
+parser: RenderSpider
+render: true
+public: true
+proxy: false
+search:
+  paths:
+  - path:
+    method: chrome
+    params:
+      keyword: //input[@name="keyword"]
+      submit: //button[@type="submit"]
+      referer: search?keyword={keyword}
+torrents:
+  list:
+    selector: ul.list-unstyled
+  fields:
+    title:
+      selector: a.result-resource-title
+      attribute: title
+    details:
+      selector: a.result-resource-title
+      attribute: href
+    download:
+      detail:
+        xpath: //a[@id="magnet"]/@href
+    date_added:
+      selector: li.result-resource-meta-info > span:nth-child(3)
+      optional: true
+    size:
+      selector: li.result-resource-meta-info > span:nth-child(1)
+    downloadvolumefactor:
+      case:
+        '*': 0
+    uploadvolumefactor:
+      case:
+        '*': 1

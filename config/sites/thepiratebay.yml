@@ -1,0 +1,46 @@
+id: thepiratebay
+name: 海盗湾
+domain: https://thepiratebay.org/
+encoding: UTF-8
+render: true
+public: true
+proxy: true
+language: en
+search:
+  paths:
+  - path: search.php?q={keyword}&all=on&search=Pirate+Search&page=0&orderby=
+    method: get
+torrents:
+  list:
+    selector: div.browse > section.col-center > ol.view-single > li.list-entry
+  fields:
+    id:
+      selector: a[href*="/description.php?id="]
+      attribute: href
+      filters:
+      - name: re_search
+        args: [\d+, 0]
+    title:
+      selector: span:nth-child(2) > a
+    details:
+      selector: span:nth-child(2) > a
+      attribute: href
+    download:
+      selector: span:nth-child(4) > a
+      attribute: href
+    date_added:
+      selector: span:nth-child(3)
+    size:
+      selector: span:nth-child(5)
+    seeders:
+      selector: span:nth-child(6)
+    leechers:
+      selector: span:nth-child(7)
+    grabs:
+      selector: span:nth-child(8)
+    downloadvolumefactor:
+      case:
+        '*': 0
+    uploadvolumefactor:
+      case:
+        '*': 1

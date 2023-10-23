@@ -17,6 +17,10 @@ class Indexer(object):
     progress = None
     dbhelper = None
 
+    # 增强版：绑定内置索引器属性
+    _builtin_client = None
+    _builtin_client_type = None
+
     def __init__(self):
         self._indexer_schemas = SubmoduleHelper.import_submodules(
             'app.indexer.client',
@@ -32,6 +36,9 @@ class Indexer(object):
         self._client = self.__get_client(indexer)
         if self._client:
             self._client_type = self._client.get_type()
+        # 增强版：绑定内置索引器属性
+        self._builtin_client = self.__get_client('builtin')
+        self._builtin_client_type = self._builtin_client.get_type()
 
     def __build_class(self, ctype, conf):
         for indexer_schema in self._indexer_schemas:
@@ -50,6 +57,14 @@ class Indexer(object):
             return []
         return self._client.get_indexers(check=check)
 
+    def get_builtin_indexers(self, check=False):
+        """
+        增强版：获取内置索引器的索引站点
+        """
+        if not self._builtin_client:
+            return []
+        return self._builtin_client.get_indexers(check=check)
+
     def get_indexer(self, url):
         """
         获取索引器的信息
@@ -57,6 +72,14 @@ class Indexer(object):
         if not self._client:
             return None
         return self._client.get_indexer(url)
+
+    def get_builtin_indexer(self, url):
+        """
+        增强版：获取内置索引器的信息
+        """
+        if not self._builtin_client:
+            return None
+        return self._builtin_client.get_indexer(url)
 
     def get_indexer_dict(self, check=True):
         """
@@ -69,6 +92,19 @@ class Indexer(object):
                 "domain": StringUtils.get_url_domain(index.domain),
                 "public": index.public,
             } for index in self.get_indexers(check=check)
+        ]
+
+    def get_builtin_indexer_dict(self, check=True):
+        """
+        # 增强版：获取用户已经选择的内置索引器字典
+        """
+        return [
+            {
+                "id": index.id,
+                "name": index.name,
+                "domain": StringUtils.get_url_domain(index.domain),
+                "public": index.public,
+            } for index in self.get_builtin_indexers(check=check)
         ]
 
     def get_indexer_hash_dict(self):
@@ -89,7 +125,9 @@ class Indexer(object):
         """
         获取当前用户选中的索引器的索引站点名称
         """
-        return [indexer.name for indexer in self.get_indexers(check=True)]
+        # return [indexer.name for indexer in self.get_indexers(check=True)]
+        # 增强版：固定从内置索引器获取
+        return [indexer.name for indexer in self.get_builtin_indexers(check=True)]
 
     def list_resources(self, url, page=0, keyword=None):
         """

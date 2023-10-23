@@ -15,7 +15,7 @@ from app.sites import Sites
 from app.utils import StringUtils
 from app.utils.types import SearchType, IndexerType, ProgressKey, SystemConfigKey
 from config import Config
-from web.backend.user import User
+from web.backend.user_proxy import UserProxy
 
 
 class BuiltinIndexer(_IIndexClient):
@@ -45,7 +45,7 @@ class BuiltinIndexer(_IIndexClient):
         self.sites = Sites()
         self.progress = ProgressHelper()
         self.dbhelper = DbHelper()
-        self.user = User()
+        self.user = UserProxy()
         self.chromehelper = ChromeHelper()
         self.systemconfig = SystemConfig()
         self._show_more_sites = Config().get_config("laboratory").get('show_more_sites')

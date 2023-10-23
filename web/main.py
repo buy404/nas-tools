@@ -46,7 +46,7 @@ from config import PT_TRANSFER_INTERVAL, Config, TMDB_API_DOMAINS
 from web.action import WebAction
 from web.apiv1 import apiv1_bp
 from web.backend.WXBizMsgCrypt3 import WXBizMsgCrypt
-from web.backend.user import User
+from web.backend.user_proxy import UserProxy
 from web.backend.wallpaper import get_login_wallpaper
 from web.backend.web_utils import WebUtils
 from web.security import require_auth
@@ -100,7 +100,7 @@ def add_header(r):
 # 定义获取登录用户的方法
 @LoginManager.user_loader
 def load_user(user_id):
-    return User().get(user_id)
+    return UserProxy().get(user_id)
 
 
 # 页面不存在
@@ -183,7 +183,7 @@ def login():
         remember = request.form.get('remember')
         if not username:
             return redirect_to_login('请输入用户名')
-        user_info = User().get_user(username)
+        user_info = UserProxy().get_user(username)
         if not user_info:
             return redirect_to_login('用户名或密码错误')
         # 校验密码
@@ -213,7 +213,9 @@ def web():
     RestypeDict = ModuleConf.TORRENT_SEARCH_PARAMS.get("restype")
     PixDict = ModuleConf.TORRENT_SEARCH_PARAMS.get("pix")
     SiteFavicons = Sites().get_site_favicon()
-    Indexers = Indexer().get_indexers()
+    # Indexers = Indexer().get_indexers()
+    # 增强版：固定从内置索引器获取
+    Indexers = Indexer().get_builtin_indexers()
     SearchSource = "douban" if Config().get_config("laboratory").get("use_douban_titles") else "tmdb"
     CustomScriptCfg = SystemConfig().get(SystemConfigKey.CustomScript)
     CooperationSites = current_user.get_authsites()
@@ -295,7 +297,7 @@ def search():
     # 权限
     if current_user.is_authenticated:
         username = current_user.username
-        pris = User().get_user(username).get("pris")
+        pris = UserProxy().get_user(username).get("pris")
     else:
         pris = ""
     # 结果
@@ -391,7 +393,9 @@ def sites():
 @App.route('/sitelist', methods=['POST', 'GET'])
 @login_required
 def sitelist():
-    IndexerSites = Indexer().get_indexer_dict(check=False)
+    # IndexerSites = Indexer().get_indexer_dict(check=False)
+    # 增强版：固定从内置索引器获取
+    IndexerSites = Indexer().get_builtin_indexer_dict(check=False)
     return render_template("site/sitelist.html",
                            Sites=IndexerSites,
                            Count=len(IndexerSites))
@@ -924,7 +928,9 @@ def download_setting():
 @login_required
 def indexer():
     # 只有选中的索引器才搜索
-    indexers = Indexer().get_indexers(check=False)
+    # indexers = Indexer().get_indexers(check=False)
+    # 增强版：固定从内置索引器获取
+    indexers = Indexer().get_builtin_indexers(check=False)
     private_count = len([item.id for item in indexers if not item.public])
     public_count = len([item.id for item in indexers if item.public])
     indexer_sites = SystemConfig().get(SystemConfigKey.UserIndexerSites)

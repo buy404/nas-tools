@@ -1,0 +1,44 @@
+id: katcr
+name: KickAssTorrents
+domain: https://katcr.to/
+encoding: UTF-8
+public: true
+proxy: true
+language: en
+search:
+  paths:
+  - path: usearch/{keyword}/
+    method: get
+torrents:
+  list:
+    selector: table.data.frontPageWidget > tbody > tr
+  fields:
+    title:
+      selector: div.torrentname > div.markeredBlock.torType.filmType > a
+    details:
+      selector: div.torrentname > div.markeredBlock.torType.filmType > a
+      attribute: href
+    download:
+      detail:
+        xpath: //a[contains(@class, "giantButton")][contains(@href, "magnet:")]/@href
+    date_added:
+      selector: td:nth-child(4)
+      optional: true
+    size:
+      selector: td:nth-child(2)
+      filters:
+      - name: strip
+    seeders:
+      selector: td:nth-child(5)
+      filters:
+      - name: strip
+    leechers:
+      selector: td:nth-child(6)
+      filters:
+      - name: strip
+    downloadvolumefactor:
+      case:
+        '*': 0
+    uploadvolumefactor:
+      case:
+        '*': 1

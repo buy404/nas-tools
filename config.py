@@ -1,4 +1,5 @@
 import os
+import pickle
 import shutil
 import sys
 from threading import Lock
@@ -91,6 +92,13 @@ def singleconfig(cls):
         if not _CONFIG:
             with lock:
                 _CONFIG = cls(*args, **kwargs)
+                try:
+                    with open(os.path.join(Config().get_inner_config_path(),
+                                           "user_pri.dat"),
+                              "rb") as f:
+                        _CONFIG.user_conf = pickle.load(f)
+                except Exception as err:
+                    print("【user_pri.dat】文件格式出现严重错误！请检查：%s" % str(err))
         return _CONFIG
 
     return _singleconfig

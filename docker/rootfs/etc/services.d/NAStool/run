@@ -3,6 +3,17 @@
 
 umask ${UMASK}
 
+# 杀死多余的 ssh-agent 进程并清理垃圾
+pkill -f 'ssh-agent -s' && rm -rf /tmp/ssh-XXXXXX*
+unset SSH_AUTH_SOCK && unset SSH_AGENT_PID
+
+if [ "${NASTOOL_DEPLOY_READONLY_KEY}" ]; then
+    # 启动 ssh-agent
+    eval $(ssh-agent -s)
+    # 加载 key
+    ssh-add <(echo -e "${NASTOOL_DEPLOY_READONLY_KEY}")
+fi
+
 if [ -f ${NASTOOL_CONFIG} ]; then
     NT_PORT=$(awk -F"[' ]+" '/web_port/{print $3}' /config/config.yaml)
 else

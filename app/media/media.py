@@ -908,8 +908,9 @@ class Media:
                         if not parent_info.get_name() or not parent_info.year:
                             parent_parent_info = MetaInfo(parent_parent_name)
                             parent_info.type = parent_parent_info.type if parent_parent_info.type and parent_info.type != MediaType.TV else parent_info.type
-                            parent_info.cn_name = parent_parent_info.cn_name if parent_parent_info.cn_name else parent_info.cn_name
-                            parent_info.en_name = parent_parent_info.en_name if parent_parent_info.en_name else parent_info.en_name
+                            if not parent_info.get_name():
+                                parent_info.cn_name = parent_parent_info.cn_name if parent_parent_info.cn_name else parent_info.cn_name
+                                parent_info.en_name = parent_parent_info.en_name if parent_parent_info.en_name else parent_info.en_name
                             parent_info.year = parent_parent_info.year if parent_parent_info.year else parent_info.year
                             parent_info.begin_season = NumberUtils.max_ele(parent_info.begin_season,
                                                                            parent_parent_info.begin_season)
@@ -924,6 +925,20 @@ class Media:
                         if meta_info.type == MediaType.TV:
                             meta_info.begin_season = NumberUtils.max_ele(parent_info.begin_season,
                                                                          meta_info.begin_season)
+                        if not meta_info.part:
+                            meta_info.part = parent_info.part
+                        if not meta_info.resource_effect:
+                            meta_info.resource_effect = parent_info.resource_effect
+                        if not meta_info.resource_pix:
+                            meta_info.resource_pix = parent_info.resource_pix
+                        if not meta_info.resource_type:
+                            meta_info.resource_type = parent_info.resource_type
+                        if not meta_info.video_encode:
+                            meta_info.video_encode = parent_info.video_encode
+                        if not meta_info.audio_encode:
+                            meta_info.audio_encode = parent_info.audio_encode
+                        if not meta_info.resource_team:
+                            meta_info.resource_team = parent_info.resource_team
                     if not meta_info.get_name() or not meta_info.type:
                         log.warn("【Rmt】%s 未识别出有效信息！" % meta_info.org_string)
                         continue

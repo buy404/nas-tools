@@ -158,6 +158,14 @@ function __main {
 
     # 自动更新
     if [ "${NASTOOL_AUTO_UPDATE}" = "true" ]; then
+
+        if [ "${NASTOOL_DEPLOY_READONLY_KEY}" ]; then
+            # 启动 ssh-agent
+            eval $(ssh-agent -s)
+            # 加载 key
+            ssh-add <(echo -e "${NASTOOL_DEPLOY_READONLY_KEY}")
+        fi
+
         if [ ! -s /tmp/requirements.txt.sha256sum ]; then
             sha256sum requirements.txt > /tmp/requirements.txt.sha256sum
         fi
@@ -173,6 +181,10 @@ function __main {
         # 更新分支
         if [[ "${NASTOOL_VERSION}" == "dev" ]]; then
         branch="dev"
+
+        elif [ "${NASTOOL_VERSION}" == "wdmcheng-enhanced" ]; then
+        branch="wdmcheng-enhanced"
+
         else
         branch="master"
         fi
@@ -197,6 +209,11 @@ function __main {
         else
             echo "更新失败，继续使用旧的程序来启动..."
         fi
+
+        if [ "${SSH_AUTH_SOCK}" ]; then
+            eval $(ssh-agent -k)
+        fi
+
     else
         echo "程序自动升级已关闭，如需自动升级请在创建容器时设置环境变量：NASTOOL_AUTO_UPDATE=true"
     fi

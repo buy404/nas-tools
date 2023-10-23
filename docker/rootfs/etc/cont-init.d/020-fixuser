@@ -13,7 +13,16 @@ function __fixuser {
     if grep -Eqi "Debian" /etc/issue || grep -Eq "Debian" /etc/os-release; then
         chown -R nt:nt /usr/bin/chromedriver
     fi
-    chown -R nt:nt "${WORKDIR}" "${HOME}" /config /usr/lib/chromium /etc/hosts
+    chown -R nt:nt "${HOME}" /config /usr/lib/chromium /etc/hosts
+    # chown /nas-tools
+    chown "${PUID}":"${PGID}" "${WORKDIR}"
+    # /nas-tools/下除.git|.github之外 chown
+    find "${WORKDIR}" -maxdepth 1 -not \( -path "${WORKDIR}" \) -not \( -path "${WORKDIR}/.git" -prune \) -not \( -path "${WORKDIR}/.github" -prune \) -exec chown -R nt:nt {} \;
+    # .git|.github 只在权限不匹配时 chown
+    if [ "$(stat -c %u ${WORKDIR}/.git)":"$(stat -c %g ${WORKDIR}/.git)" != "${PUID}":"${PGID}" ]; then
+        find "${WORKDIR}/.git" ! -user "${PUID}" -a ! -group "${PGID}" -exec chown "${PUID}":"${PGID}" {} \;
+        find "${WORKDIR}/.github" ! -user "${PUID}" -a ! -group "${PGID}" -exec chown "${PUID}":"${PGID}" {} \;
+    fi
 
 }
 

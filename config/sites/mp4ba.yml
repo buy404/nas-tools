@@ -1,0 +1,36 @@
+id: mp4ba
+name: 高清Mp4吧
+domain: https://www.mp4ba.vip/
+encoding: UTF-8
+render: true
+public: true
+proxy: false
+search:
+  paths:
+  - path: ?s={keyword}
+    method: get
+torrents:
+  list:
+    selector: div.container > div.mainleft > ul > li
+  fields:
+    title:
+      selector: div.article > h2 > a
+      filters:
+      - name: replace
+        args: ['][', ' ']
+      - name: replace
+        args: ['[', '']
+      - name: replace
+        args: [']', '']
+    details:
+      selector: div.article > h2 > a
+      attribute: href
+    download:
+      detail:
+        xpath: //div[@class="hacklogdownload_right"]/a/@href
+    downloadvolumefactor:
+      case:
+        '*': 0
+    uploadvolumefactor:
+      case:
+        '*': 1

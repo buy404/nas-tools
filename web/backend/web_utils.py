@@ -54,10 +54,12 @@ class WebUtils:
         """
         try:
             releases_update_only = Config().get_config("app").get("releases_update_only")
-            version_res = RequestUtils(proxies=Config().get_proxies()).get_res(
-                f"https://nastool.org/{quote(WebUtils.get_current_version())}/update")
+            # version_res = RequestUtils(proxies=Config().get_proxies()).get_res(
+            #     f"https://nastool.org/{quote(WebUtils.get_current_version())}/update")
+            version_res = WebUtils.get_latest_version_inner()
             if version_res:
-                ver_json = version_res.json()
+                # ver_json = version_res.json()
+                ver_json = version_res
                 version = ver_json.get("latest")
                 link = ver_json.get("link")
                 if version and releases_update_only:
@@ -66,6 +68,36 @@ class WebUtils:
         except Exception as e:
             ExceptionUtils.exception_traceback(e)
         return None, None
+
+    @staticmethod
+    def get_latest_version_inner():
+        """
+        从 GitHub 获取最新版本号
+        """
+        try:
+            releases_update_only = Config().get_config("app").get("releases_update_only")
+            version_res = RequestUtils(proxies=Config().get_proxies()).get_res(
+                "https://api.github.com/repos/NAStool/nas-tools/releases/latest")
+            if version_res:
+                ver_json = version_res.json()
+                url = ver_json["html_url"]
+                if releases_update_only:
+                    version = f"{ver_json['tag_name']}"
+                    return {'latest': version, 'link': url}
+                else:
+                    commit_res = RequestUtils(
+                        headers={'Accept': 'application/vnd.github+json',
+                                 'Authorization': 'Bearer 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',
+                                 'X-GitHub-Api-Version': '2022-11-28'},
+                        proxies=Config().get_proxies()).get_res(
+                        "https://api.github.com/repos/NAStool/nas-tools-dev/commits/main")
+                    if commit_res:
+                        commit_json = commit_res.json()
+                        version = f"{ver_json['tag_name']} {commit_json['sha'][:7]}"
+                        return {'latest': version, 'link': url}
+        except Exception as e:
+            ExceptionUtils.exception_traceback(e)
+        return None
 
     @staticmethod
     def get_mediainfo_from_id(mtype, mediaid, wait=False):

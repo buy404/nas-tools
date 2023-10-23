@@ -46,7 +46,7 @@ from app.utils.types import RmtMode, OsType, SearchType, SyncType, MediaType, Mo
     EventType, SystemConfigKey, RssType
 from config import RMT_MEDIAEXT, RMT_SUBEXT, RMT_AUDIO_TRACK_EXT, Config
 from web.backend.search_torrents import search_medias_for_web, search_media_by_message
-from web.backend.user import User
+from web.backend.user_proxy import UserProxy
 from web.backend.web_utils import WebUtils
 
 
@@ -418,6 +418,11 @@ class WebAction:
                                                       cfg_value, "http": "%s" % cfg_value}
             else:
                 cfg['app']['proxies'] = {"https": None, "http": None}
+            return cfg
+        # 索引器
+        if cfg_key == "jackett.indexers":
+            vals = cfg_value.split("\n")
+            cfg['jackett']['indexers'] = vals
             return cfg
         # 最大支持三层赋值
         keys = cfg_key.split(".")
@@ -1695,9 +1700,9 @@ class WebAction:
             pris = data.get("pris")
             if isinstance(pris, list):
                 pris = ",".join(pris)
-            ret = User().add_user(name, password, pris)
+            ret = UserProxy().add_user(name, password, pris)
         else:
-            ret = User().delete_user(name)
+            ret = UserProxy().delete_user(name)
 
         if ret == 1 or ret:
             return {"code": 0, "success": False}
@@ -3927,7 +3932,7 @@ class WebAction:
         """
         查询所有用户
         """
-        user_list = User().get_users()
+        user_list = UserProxy().get_users()
         Users = []
         for user in user_list:
             pris = str(user.PRIS).split(",")
@@ -4729,9 +4734,9 @@ class WebAction:
         # 需要过滤的菜单
         ignore = []
         # 查询最早加入PT站的时间, 如果不足一个月, 则隐藏刷流任务
-        first_pt_site = SiteUserInfo().get_pt_site_min_join_date()
-        if not first_pt_site or not StringUtils.is_one_month_ago(first_pt_site):
-            ignore.append('brushtask')
+        # first_pt_site = SiteUserInfo().get_pt_site_min_join_date()
+        # if not first_pt_site or not StringUtils.is_one_month_ago(first_pt_site):
+        #     ignore.append('brushtask')
         # 获取可用菜单
         menus = current_user.get_usermenus(ignore=ignore)
         return {
@@ -4760,7 +4765,7 @@ class WebAction:
             params = data.get("params")
         else:
             site, params = None, {}
-        state, msg = User().check_user(site, params)
+        state, msg = UserProxy().check_user(site, params)
         if state:
             return {"code": 0, "msg": "认证成功"}
         return {"code": 1, "msg": f"{msg or '认证失败，请检查合作站点账号是否正常！'}"}

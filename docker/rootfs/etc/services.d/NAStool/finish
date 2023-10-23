@@ -1,4 +1,8 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash
 
+# 杀死 ssh-agent 进程并清理垃圾
+pkill -f 'ssh-agent -s' && rm -rf /tmp/ssh-XXXXXX*
+unset SSH_AUTH_SOCK && unset SSH_AGENT_PID
+
 pkill -f 'python3 run.py'
